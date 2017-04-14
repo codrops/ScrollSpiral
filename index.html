@@ -86,5 +86,132 @@
 			</div>
 
 		</main>
+
+	<script src="js/regl.min.js"></script>
+	<script type="x-shader/x-vertex" id="vertexShader">
+	precision mediump float;
+	attribute vec2 position;
+	void main() {
+		gl_Position = vec4(1.0 - 2.0 * position, 0.0, 1.0);
+	}
+	</script>
+	<script type="x-shader/x-fragment" id="fragmentShader">
+	#define TWO_PI 6.2831853072
+  #define PI 3.14159265359
+
+	precision highp float;
+
+	uniform float globaltime;
+	uniform vec2 resolution;
+	uniform float scroll;
+
+  const float timescale = 0.1;
+  const float displace = 0.02;
+  const float gridSize = 20.0;
+  const float wave = 3.0;
+  const float brightness = 0.8;
+
+  vec2 rotate(in vec2 v, in float angle) {
+    float c = cos(angle);
+    float s = sin(angle);
+    return v * mat2(c, -s, s, c);
+  }
+
+  vec3 coordToHex(in vec2 coord, in float scale, in float angle) {
+    vec2 c = rotate(coord, angle);
+    float q = (1.0 / 3.0 * sqrt(3.0) * c.x - 1.0 / 3.0 * c.y) * scale;
+    float r = 2.0 / 3.0 * c.y * scale;
+    return vec3(q, r, -q - r);
+  }
+
+  vec3 hexToCell(in vec3 hex, in float m) {
+    return fract(hex / m) * 2.0 - 1.0;
+  }
+
+  float absMax(in vec3 v) {
+    return max(max(abs(v.x), abs(v.y)), abs(v.z));
+  }
+
+  float nsin(in float value) {
+    return sin(value * TWO_PI) * 0.5 + 0.5;
+  }
+
+  float hexToFloat(in vec3 hex, in float amt) {
+    return mix(absMax(hex), 1.0 - length(hex) / sqrt(3.0), amt);
+  }
+
+  float calc(in vec2 tx, in float time) {
+    float value = 0.0;
+    float len = 1.0 - length(tx);
+    float angle = TWO_PI * nsin(time * 0.05) + PI * len * scroll;
+    vec3 hex = coordToHex(tx, gridSize * nsin(time * 0.1), angle);
+
+    for (int i = 0; i < 3; i++) {
+      vec3 cell = hexToCell(hex, 1.0 + float(i));
+      value += nsin(
+				hexToFloat(
+					cell,
+					nsin(time + len)
+				) * wave * nsin(time * 0.2)
+			);
+    }
+
+    return value / 3.0;
+  }
+
+  void main(void) {
+    float time = globaltime * timescale - scroll * 0.1;
+
+    vec2 tx = gl_FragCoord.xy / resolution.xy - 0.5;
+    tx.x *= resolution.x / resolution.y;
+
+    vec4 bgColor = vec4(0.0, 0.0, 0.0, 1.0);
+
+    for (int i = 0; i < 3; i++) {
+      float time2 = time + float(i) * displace;
+      bgColor[i] += pow(calc(tx, time2), 3.0) * brightness;
+    }
+
+    gl_FragColor = bgColor * vec4(1.0, 0.8, 1.0, 1.0);
+  }
+	</script>
+	<script>
+	!function() {
+		'use strict';
+
+		var canvas = document.querySelector('#webgl');
+
+		var regl = createREGL({ canvas: canvas });
+
+		var draw = regl({
+			frag: document.querySelector('#fragmentShader').textContent,
+			vert: document.querySelector('#vertexShader').textContent,
+			attributes: { position: [-2, 0, 0, -2, 2, 2] },
+			uniforms: {
+				globaltime: regl.prop('globaltime'),
+				resolution: regl.prop('resolution'),
+				scroll: regl.prop('scroll')
+			},
+			count: 3
+		});
+
+		regl.frame(function(ctx) {
+			var aspect = canvas.scrollWidth / canvas.scrollHeight;
+			var scroll = window.pageYOffset / canvas.scrollHeight;
+
+			canvas.width = 512 * aspect;
+			canvas.height = 512;
+			regl.clear({ color: [0, 0, 0, 0] });
+
+			draw({
+				globaltime: ctx.time,
+				resolution: [ctx.viewportWidth, ctx.viewportHeight],
+				scroll: scroll
+			});
+		});
+
+	}();
+	</script>
+
 	</body>
 </html>

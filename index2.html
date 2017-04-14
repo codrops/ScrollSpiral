@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title>WebGL Scroll-Spiral Effect | Demo 1 | Codrops</title>
+		<title>WebGL Scroll-Spiral Effect | Demo 2 | Codrops</title>
 		<meta name="description" content="" />
 		<meta name="keywords" content="" />
 		<meta name="author" content="Codrops" />
@@ -12,11 +12,6 @@
 		<link rel="stylesheet" type="text/css" href="css/normalize.css" />
 		<link rel="stylesheet" type="text/css" href="css/demo.css" />
 		<link rel="stylesheet" type="text/css" href="css/component.css" />
-		<style>
-		body { color: #ddd; background: #000; }
-		a { color: #eee; }
-		a:hover, a:focus { color: #fff; }
-		</style>
 		<script>document.documentElement.className = 'js';</script>
 	</head>
 	<body>
@@ -44,8 +39,8 @@
 						<h1 class="codrops-header__title">WebGL Scroll-Spiral Effect</h1>
 						<p class="codrops-header__tagline">The Tagline</p>
 						<nav class="demos">
-							<a class="demo demo--current" href="index.html">Demo 1</a>
-							<a class="demo" href="index2.html">Demo 2</a>
+							<a class="demo" href="index.html">Demo 1</a>
+							<a class="demo demo--current" href="index2.html">Demo 2</a>
 							<a class="demo" href="index3.html">Demo 3</a>
 						</nav>
 					</header>
@@ -109,75 +104,36 @@
 	uniform float globaltime;
 	uniform vec2 resolution;
 	uniform float scroll;
+	uniform sampler2D texture;
 
-  const float timescale = 0.1;
-  const float displace = 0.02;
-  const float gridSize = 20.0;
-  const float wave = 3.0;
-  const float brightness = 0.8;
-
-  vec2 rotate(in vec2 v, in float angle) {
-    float c = cos(angle);
-    float s = sin(angle);
-    return v * mat2(c, -s, s, c);
-  }
-
-  vec3 coordToHex(in vec2 coord, in float scale, in float angle) {
-    vec2 c = rotate(coord, angle);
-    float q = (1.0 / 3.0 * sqrt(3.0) * c.x - 1.0 / 3.0 * c.y) * scale;
-    float r = 2.0 / 3.0 * c.y * scale;
-    return vec3(q, r, -q - r);
-  }
-
-  vec3 hexToCell(in vec3 hex, in float m) {
-    return fract(hex / m) * 2.0 - 1.0;
-  }
-
-  float absMax(in vec3 v) {
-    return max(max(abs(v.x), abs(v.y)), abs(v.z));
-  }
+	const float timescale = 0.1;
 
   float nsin(in float value) {
     return sin(value * TWO_PI) * 0.5 + 0.5;
   }
 
-  float hexToFloat(in vec3 hex, in float amt) {
-    return mix(absMax(hex), 1.0 - length(hex) / sqrt(3.0), amt);
-  }
-
-  float calc(in vec2 tx, in float time) {
-    float value = 0.0;
-    float len = 1.0 - length(tx);
-    float angle = TWO_PI * nsin(time * 0.05) + PI * len * scroll;
-    vec3 hex = coordToHex(tx, gridSize * nsin(time * 0.1), angle);
-
-    for (int i = 0; i < 3; i++) {
-      vec3 cell = hexToCell(hex, 1.0 + float(i));
-      value += nsin(
-				hexToFloat(
-					cell,
-					nsin(time + len)
-				) * wave * nsin(time * 0.2)
-			);
-    }
-
-    return value / 3.0;
-  }
+	vec2 rotate2D(vec2 v, float a) {
+		float s = sin(a);
+		float c = cos(a);
+		mat2 m = mat2(c, -s, s, c);
+		return m * v;
+	}
 
   void main(void) {
-    float time = globaltime * timescale - scroll * 0.1;
-
-    vec2 tx = gl_FragCoord.xy / resolution.xy - 0.5;
+		vec2 tx = gl_FragCoord.xy / resolution.xy - 0.5;
     tx.x *= resolution.x / resolution.y;
+		float len = 1.0 - length(tx);
+		float time = globaltime * timescale;
 
-    vec4 bgColor = vec4(0.0, 0.0, 0.0, 1.0);
+		vec4 imgColor = texture2D(
+			texture,
+			rotate2D(
+				tx * vec2(1.0, -1.0),
+				time + TWO_PI * len * scroll
+			) + 0.5
+		);
 
-    for (int i = 0; i < 3; i++) {
-      float time2 = time + float(i) * displace;
-      bgColor[i] += pow(calc(tx, time2), 3.0) * brightness;
-    }
-
-    gl_FragColor = bgColor * vec4(1.0, 0.8, 1.0, 1.0);
+    gl_FragColor = imgColor;
   }
 	</script>
 	<script>
@@ -185,35 +141,40 @@
 		'use strict';
 
 		var canvas = document.querySelector('#webgl');
+		var img = new Image();
+		img.src = 'img/test.jpg';
 
 		var regl = createREGL({ canvas: canvas });
 
-		var draw = regl({
-			frag: document.querySelector('#fragmentShader').textContent,
-			vert: document.querySelector('#vertexShader').textContent,
-			attributes: { position: [-2, 0, 0, -2, 2, 2] },
-			uniforms: {
-				globaltime: regl.prop('globaltime'),
-				resolution: regl.prop('resolution'),
-				scroll: regl.prop('scroll')
-			},
-			count: 3
-		});
-
-		regl.frame(function(ctx) {
-			var aspect = canvas.scrollWidth / canvas.scrollHeight;
-			var scroll = window.pageYOffset / canvas.scrollHeight;
-
-			canvas.width = 512 * aspect;
-			canvas.height = 512;
-			regl.clear({ color: [0, 0, 0, 0] });
-
-			draw({
-				globaltime: ctx.time,
-				resolution: [ctx.viewportWidth, ctx.viewportHeight],
-				scroll: scroll
+		img.onload = function() {
+			var draw = regl({
+				frag: document.querySelector('#fragmentShader').textContent,
+				vert: document.querySelector('#vertexShader').textContent,
+				attributes: { position: [-2, 0, 0, -2, 2, 2] },
+				uniforms: {
+					globaltime: regl.prop('globaltime'),
+					resolution: regl.prop('resolution'),
+					scroll: regl.prop('scroll'),
+					texture: regl.texture(img)
+				},
+				count: 3
 			});
-		});
+
+			regl.frame(function(ctx) {
+				var aspect = canvas.scrollWidth / canvas.scrollHeight;
+				var scroll = window.pageYOffset / canvas.scrollHeight;
+
+				canvas.width = 1024 * aspect;
+				canvas.height = 1024;
+				regl.clear({ color: [0, 0, 0, 0] });
+
+				draw({
+					globaltime: ctx.time,
+					resolution: [ctx.viewportWidth, ctx.viewportHeight],
+					scroll: scroll
+				});
+			});
+		};
 
 	}();
 	</script>

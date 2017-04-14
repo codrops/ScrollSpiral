@@ -36,20 +36,3 @@
 .content.centered {
   text-align: center;
 }
-
-body {
-	font-family: 'Roboto Mono', monospace;
-	color: #ddd;
-	background: #000;
-}
-
-a {
-	text-decoration: none;
-	color: #eee;
-	outline: none;
-}
-
-a:hover,
-a:focus {
-	color: #fff;
-}

@@ -116,36 +116,36 @@
 	const float wave = 3.0;
 	const float brightness = 0.8;
 
-	vec2 rotate(in vec2 v, in float angle) {
+	vec2 rotate(vec2 v, float angle) {
 		float c = cos(angle);
 		float s = sin(angle);
 		return v * mat2(c, -s, s, c);
 	}
 
-	vec3 coordToHex(in vec2 coord, in float scale, in float angle) {
+	vec3 coordToHex(vec2 coord, float scale, float angle) {
 		vec2 c = rotate(coord, angle);
 		float q = (1.0 / 3.0 * sqrt(3.0) * c.x - 1.0 / 3.0 * c.y) * scale;
 		float r = 2.0 / 3.0 * c.y * scale;
 		return vec3(q, r, -q - r);
 	}
 
-	vec3 hexToCell(in vec3 hex, in float m) {
+	vec3 hexToCell(vec3 hex, float m) {
 		return fract(hex / m) * 2.0 - 1.0;
 	}
 
-	float absMax(in vec3 v) {
+	float absMax(vec3 v) {
 		return max(max(abs(v.x), abs(v.y)), abs(v.z));
 	}
 
-	float nsin(in float value) {
+	float nsin(float value) {
 		return sin(value * TWO_PI) * 0.5 + 0.5;
 	}
 
-	float hexToFloat(in vec3 hex, in float amt) {
+	float hexToFloat(vec3 hex, float amt) {
 		return mix(absMax(hex), 1.0 - length(hex) / sqrt(3.0), amt);
 	}
 
-	float calc(in vec2 tx, in float time) {
+	float calc(vec2 tx, float time) {
 		float value = 0.0;
 		float len = 1.0 - length(tx);
 		float angle = TWO_PI * nsin(time * 0.05) + PI * len * scroll;
@@ -170,14 +170,15 @@
 		vec2 tx = gl_FragCoord.xy / resolution.xy - 0.5;
 		tx.x *= resolution.x / resolution.y;
 
-		vec4 bgColor = vec4(0.0, 0.0, 0.0, 1.0);
+		float rgb[3];
+		rgb[0] = 0.0, rgb[1] = 0.0, rgb[2] = 0.0;
 
 		for (int i = 0; i < 3; i++) {
 			float time2 = time + float(i) * displace;
-			bgColor[i] += pow(calc(tx, time2), 3.0) * brightness;
+			rgb[i] += pow(calc(tx, time2), 3.0) * brightness;
 		}
 
-		gl_FragColor = bgColor * vec4(1.0, 0.8, 1.0, 1.0);
+		gl_FragColor = vec4(rgb[0], rgb[1], rgb[2], 1.0) * vec4(1.0, 0.8, 1.0, 1.0);
 	}
 	</script>
 	<script>

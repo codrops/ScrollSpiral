@@ -3,7 +3,7 @@
 <head>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>WebGL Scroll-Spiral Effect | Demo 2 | Codrops</title>
+	<title>WebGL Scroll-Spiral Effect | Demo 3 | Codrops</title>
 	<meta name="description" content="" />
 	<meta name="keywords" content="" />
 	<meta name="author" content="Codrops" />
@@ -45,8 +45,8 @@
 					<p class="codrops-header__tagline">The Tagline</p>
 					<nav class="demos">
 						<a class="demo" href="index.html">Demo 1</a>
-						<a class="demo demo--current" href="index2.html">Demo 2</a>
-						<a class="demo" href="index3.html">Demo 3</a>
+						<a class="demo" href="index2.html">Demo 2</a>
+						<a class="demo demo--current" href="index3.html">Demo 3</a>
 					</nav>
 				</header>
 			</div>
@@ -109,10 +109,85 @@
 	uniform float globaltime;
 	uniform vec2 resolution;
 	uniform float scroll;
-	uniform sampler2D texture;
 
-	const float timescale = 0.1;
-	const float twist = 2.0;
+	const float timescale = 0.05;
+	const float noisescale = 1.0;
+	const int maxDots = 3;
+
+	//
+	// Description : Array and textureless GLSL 2D simplex noise function.
+	//      Author : Ian McEwan, Ashima Arts.
+	//  Maintainer : ijm
+	//     Lastmod : 20110822 (ijm)
+	//     License : Copyright (C) 2011 Ashima Arts. All rights reserved.
+	//               Distributed under the MIT License. See LICENSE file.
+	//               https://github.com/ashima/webgl-noise
+	//
+
+	vec2 n2mod289(vec2 x) {
+	  return x - floor(x * (1.0 / 289.0)) * 289.0;
+	}
+
+	vec3 n2mod289(vec3 x) {
+	  return x - floor(x * (1.0 / 289.0)) * 289.0;
+	}
+
+	vec4 n2mod289(vec4 x) {
+	  return x - floor(x * (1.0 / 289.0)) * 289.0;
+	}
+
+	vec3 permute(vec3 x) {
+	  return n2mod289(((x*34.0)+1.0)*x);
+	}
+
+	float snoise(vec2 v)
+	  {
+	  const vec4 C = vec4(0.211324865405187,  // (3.0-sqrt(3.0))/6.0
+	                      0.366025403784439,  // 0.5*(sqrt(3.0)-1.0)
+	                     -0.577350269189626,  // -1.0 + 2.0 * C.x
+	                      0.024390243902439); // 1.0 / 41.0
+	// First corner
+	  vec2 i  = floor(v + dot(v, C.yy) );
+	  vec2 x0 = v -   i + dot(i, C.xx);
+
+	// Other corners
+	  vec2 i1;
+	  //i1.x = step( x0.y, x0.x ); // x0.x > x0.y ? 1.0 : 0.0
+	  //i1.y = 1.0 - i1.x;
+	  i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+	  // x0 = x0 - 0.0 + 0.0 * C.xx ;
+	  // x1 = x0 - i1 + 1.0 * C.xx ;
+	  // x2 = x0 - 1.0 + 2.0 * C.xx ;
+	  vec4 x12 = x0.xyxy + C.xxzz;
+	  x12.xy -= i1;
+
+	// Permutations
+	  i = n2mod289(i); // Avoid truncation effects in permutation
+	  vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 ))
+			+ i.x + vec3(0.0, i1.x, 1.0 ));
+
+	  vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0);
+	  m = m*m ;
+	  m = m*m ;
+
+	// Gradients: 41 points uniformly over a line, mapped onto a diamond.
+	// The ring size 17*17 = 289 is close to a multiple of 41 (41*7 = 287)
+
+	  vec3 x = 2.0 * fract(p * C.www) - 1.0;
+	  vec3 h = abs(x) - 0.5;
+	  vec3 ox = floor(x + 0.5);
+	  vec3 a0 = x - ox;
+
+	// Normalise gradients implicitly by scaling m
+	// Approximation of: m *= inversesqrt( a0*a0 + h*h );
+	  m *= 1.79284291400159 - 0.85373472095314 * ( a0*a0 + h*h );
+
+	// Compute final noise value at P
+	  vec3 g;
+	  g.x  = a0.x  * x0.x  + h.x  * x0.y;
+	  g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+	  return 130.0 * dot(m, g);
+	}
 
 	float nsin(float value) {
 		return sin(value * TWO_PI) * 0.5 + 0.5;
@@ -127,19 +202,32 @@
 	void main(void) {
 		vec2 tx = gl_FragCoord.xy / resolution.xy - 0.5;
 		tx.x *= resolution.x / resolution.y;
-		float len = 1.0 - length(tx);
+
 		float time = globaltime * timescale;
-		float zoom = 1.0 + scroll;
 
-		vec4 imgColor = texture2D(
-			texture,
-			rotate(
-				tx * vec2(1.0, -1.0) * zoom,
-				twist * TWO_PI * nsin(len + time) * scroll + time
-			) + 0.5
+		vec3 dots[maxDots];
+		float scalar = 0.0;
+		vec2 gradient = vec2(0.0, 0.0);
+
+		for (int i = 0; i < maxDots; i++) {
+			dots[i] = vec3(
+				snoise(vec2(float(i), time) * noisescale),
+				snoise(vec2(-float(i), -time) * noisescale),
+				snoise(vec2(-float(i), time) * noisescale)
+			) * 0.5;
+		}
+
+		for (int i = 0; i < maxDots; i++) {
+			float d = 1.0 / distance(tx, dots[i].xy) * dots[i].z;
+			scalar += d;
+			gradient += (dots[i].xy - tx) * d;
+		}
+
+		gl_FragColor = mix(
+			vec4(0.0, 0.0, 0.0, 1.0),
+			vec4(1.0, 1.0, 1.0, 1.0),
+			nsin(scalar) * 0.5 + nsin(length(gradient) * 30.0) * 0.5
 		);
-
-		gl_FragColor = imgColor;
 	}
 	</script>
 	<script>
@@ -148,37 +236,32 @@
 
 		var canvas = document.querySelector('#webgl');
 		var regl = createREGL({ canvas: canvas });
-		var img = new Image();
-		img.src = 'img/test.jpg';
-		img.onload = function() {
-			var draw = regl({
-				frag: document.querySelector('#fragmentShader').textContent,
-				vert: document.querySelector('#vertexShader').textContent,
-				attributes: { position: [-2, 0, 0, -2, 2, 2] },
-				uniforms: {
-					globaltime: regl.prop('globaltime'),
-					resolution: regl.prop('resolution'),
-					scroll: regl.prop('scroll'),
-					texture: regl.texture(img)
-				},
-				count: 3
+		var draw = regl({
+			frag: document.querySelector('#fragmentShader').textContent,
+			vert: document.querySelector('#vertexShader').textContent,
+			attributes: { position: [-2, 0, 0, -2, 2, 2] },
+			uniforms: {
+				globaltime: regl.prop('globaltime'),
+				resolution: regl.prop('resolution'),
+				scroll: regl.prop('scroll')
+			},
+			count: 3
+		});
+
+		regl.frame(function(ctx) {
+			var aspect = canvas.scrollWidth / canvas.scrollHeight;
+			var scroll = window.pageYOffset / (document.documentElement.scrollHeight - window.innerHeight);
+
+			canvas.width = 512 * aspect;
+			canvas.height = 512;
+			regl.clear({ color: [0, 0, 0, 0] });
+
+			draw({
+				globaltime: ctx.time,
+				resolution: [ctx.viewportWidth, ctx.viewportHeight],
+				scroll: scroll
 			});
-
-			regl.frame(function(ctx) {
-				var aspect = canvas.scrollWidth / canvas.scrollHeight;
-				var scroll = window.pageYOffset / (document.documentElement.scrollHeight - window.innerHeight);
-
-				canvas.width = 1024 * aspect;
-				canvas.height = 1024;
-				regl.clear({ color: [0, 0, 0, 0] });
-
-				draw({
-					globaltime: ctx.time,
-					resolution: [ctx.viewportWidth, ctx.viewportHeight],
-					scroll: scroll
-				});
-			});
-		};
+		});
 
 	}();
 	</script>

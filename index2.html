@@ -13,6 +13,11 @@
 		<link rel="stylesheet" type="text/css" href="css/demo.css" />
 		<link rel="stylesheet" type="text/css" href="css/component.css" />
 		<script>document.documentElement.className = 'js';</script>
+		<style>
+		body { color: #222; background: #fff; }
+		a { color: #222; }
+		a:hover, a:focus { color: #222; }
+		</style>
 	</head>
 	<body>
 		<canvas id="webgl"></canvas>
@@ -107,16 +112,20 @@
 	uniform sampler2D texture;
 
 	const float timescale = 0.1;
+	const float twist = 2.0;
 
   float nsin(in float value) {
     return sin(value * TWO_PI) * 0.5 + 0.5;
   }
 
-	vec2 rotate2D(vec2 v, float a) {
-		float s = sin(a);
-		float c = cos(a);
-		mat2 m = mat2(c, -s, s, c);
-		return m * v;
+	vec2 rotate(in vec2 v, in float angle) {
+    float c = cos(angle);
+    float s = sin(angle);
+    return v * mat2(c, -s, s, c);
+  }
+
+	float lum(in vec4 v) {
+		return 0.299 * v.x + 0.587 * v.y + 0.114 * v.z;
 	}
 
   void main(void) {
@@ -124,17 +133,18 @@
     tx.x *= resolution.x / resolution.y;
 		float len = 1.0 - length(tx);
 		float time = globaltime * timescale;
+		float zoom = 1.0 + scroll;
 
 		vec4 imgColor = texture2D(
 			texture,
-			rotate2D(
-				tx * vec2(1.0, -1.0),
-				time + TWO_PI * len * scroll
+			rotate(
+				tx * vec2(1.0, -1.0) * zoom,
+				twist * TWO_PI * nsin(len + time) * scroll + time
 			) + 0.5
 		);
 
-    gl_FragColor = imgColor;
-  }
+		gl_FragColor = imgColor;
+	}
 	</script>
 	<script>
 	!function() {
@@ -162,7 +172,7 @@
 
 			regl.frame(function(ctx) {
 				var aspect = canvas.scrollWidth / canvas.scrollHeight;
-				var scroll = window.pageYOffset / canvas.scrollHeight;
+				var scroll = window.pageYOffset / (document.documentElement.scrollHeight - window.innerHeight);
 
 				canvas.width = 1024 * aspect;
 				canvas.height = 1024;

@@ -165,7 +165,7 @@
   }
 
   void main(void) {
-    float time = globaltime * timescale - scroll * 0.1;
+    float time = globaltime * timescale - scroll;
 
     vec2 tx = gl_FragCoord.xy / resolution.xy - 0.5;
     tx.x *= resolution.x / resolution.y;
@@ -202,7 +202,7 @@
 
 		regl.frame(function(ctx) {
 			var aspect = canvas.scrollWidth / canvas.scrollHeight;
-			var scroll = window.pageYOffset / canvas.scrollHeight;
+			var scroll = window.pageYOffset / (document.documentElement.scrollHeight - window.innerHeight);
 
 			canvas.width = 512 * aspect;
 			canvas.height = 512;

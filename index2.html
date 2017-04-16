@@ -109,14 +109,11 @@
 	uniform float globaltime;
 	uniform vec2 resolution;
 	uniform float scroll;
+	uniform float velocity;
 	uniform sampler2D texture;
 
 	const float timescale = 0.1;
 	const float twist = 2.0;
-
-	float nsin(float value) {
-		return sin(value * TWO_PI) * 0.5 + 0.5;
-	}
 
 	vec2 rotate(vec2 v, float angle) {
 		float c = cos(angle);
@@ -124,12 +121,20 @@
 		return v * mat2(c, -s, s, c);
 	}
 
+	float nsin(float value) {
+		return sin(value * TWO_PI) * 0.5 + 0.5;
+	}
+
+	float lum(vec4 c) {
+		return 0.299 * c.r + 0.587 * c.g + 0.114 * c.b;
+	}
+
 	void main(void) {
 		vec2 tx = gl_FragCoord.xy / resolution.xy - 0.5;
 		tx.x *= resolution.x / resolution.y;
 		float len = 1.0 - length(tx);
 		float time = globaltime * timescale;
-		float zoom = 1.0 + scroll;
+		float zoom = 1.0 + scroll + velocity;
 
 		vec4 imgColor = texture2D(
 			texture,
@@ -139,7 +144,17 @@
 			) + 0.5
 		);
 
-		gl_FragColor = imgColor;
+		vec4 mapColor = mix(
+			vec4(1.0, 0.0, 0.5, 1.0),
+			vec4(1.0, 0.8, 1.0, 1.0),
+			lum(imgColor)
+		);
+
+		gl_FragColor = mix(
+			imgColor,
+			mapColor,
+			clamp(abs(velocity * 5.0), 0.0, 1.0)
+		);
 	}
 	</script>
 	<script>
@@ -148,6 +163,9 @@
 
 		var canvas = document.querySelector('#webgl');
 		var regl = createREGL({ canvas: canvas });
+		var velocity = 0.0;
+		var lastScroll = 0.0;
+
 		var img = new Image();
 		img.src = 'img/test.jpg';
 		img.onload = function() {
@@ -159,6 +177,7 @@
 					globaltime: regl.prop('globaltime'),
 					resolution: regl.prop('resolution'),
 					scroll: regl.prop('scroll'),
+					velocity: regl.prop('velocity'),
 					texture: regl.texture(img)
 				},
 				count: 3
@@ -167,6 +186,8 @@
 			regl.frame(function(ctx) {
 				var aspect = canvas.scrollWidth / canvas.scrollHeight;
 				var scroll = window.pageYOffset / (document.documentElement.scrollHeight - window.innerHeight);
+				velocity = velocity * 0.98 + (scroll - lastScroll);
+				lastScroll = scroll;
 
 				canvas.width = 1024 * aspect;
 				canvas.height = 1024;
@@ -175,7 +196,8 @@
 				draw({
 					globaltime: ctx.time,
 					resolution: [ctx.viewportWidth, ctx.viewportHeight],
-					scroll: scroll
+					scroll: scroll,
+					velocity: velocity
 				});
 			});
 		};

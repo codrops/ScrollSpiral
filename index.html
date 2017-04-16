@@ -113,8 +113,9 @@
 	const float timescale = 0.1;
 	const float displace = 0.02;
 	const float gridSize = 20.0;
-	const float wave = 3.0;
-	const float brightness = 0.8;
+	const int layers = 3;
+	const float detail = 2.0;
+	const float wave = 1.5;
 
 	vec2 rotate(vec2 v, float angle) {
 		float c = cos(angle);
@@ -148,37 +149,46 @@
 	float calc(vec2 tx, float time) {
 		float value = 0.0;
 		float len = 1.0 - length(tx);
-		float angle = TWO_PI * nsin(time * 0.05) + PI * len * scroll;
-		vec3 hex = coordToHex(tx, gridSize * nsin(time * 0.1), angle);
+		float zoom = nsin(time * 0.1) * (1.0 + scroll);
+		float angle = TWO_PI * nsin(time * 0.05) + TWO_PI * len * scroll;
+		vec3 hex = coordToHex(tx, gridSize * zoom, angle);
 
-		for (int i = 0; i < 3; i++) {
+		for (int i = 0; i < layers; i++) {
 			vec3 cell = hexToCell(hex, 1.0 + float(i));
 			value += nsin(
 				hexToFloat(
 					cell,
-					nsin(time + len)
-				) * wave * nsin(time * 0.2)
+					nsin(time + len * wave)
+				) * detail + nsin(time * 0.2)
 			);
 		}
 
-		return value / 3.0;
+		return value / float(layers);
 	}
 
 	void main(void) {
-		float time = globaltime * timescale - scroll;
-
 		vec2 tx = gl_FragCoord.xy / resolution.xy - 0.5;
 		tx.x *= resolution.x / resolution.y;
+		float time = globaltime * timescale - scroll;
 
 		float rgb[3];
-		rgb[0] = 0.0, rgb[1] = 0.0, rgb[2] = 0.0;
+		vec4 black = mix(
+			vec4(0.0, 0.0, 0.2, 1.0),
+			vec4(0.1, 0.0, 0.2, 1.0),
+			scroll
+		);
+		vec4 white = mix(
+			vec4(0.8, 0.7, 0.9, 1.0),
+			vec4(0.9, 0.6, 0.2, 1.0),
+			scroll
+		);
 
 		for (int i = 0; i < 3; i++) {
 			float time2 = time + float(i) * displace;
-			rgb[i] += pow(calc(tx, time2), 3.0) * brightness;
+			rgb[i] = pow(calc(tx, time2), 3.0);
 		}
 
-		gl_FragColor = vec4(rgb[0], rgb[1], rgb[2], 1.0) * vec4(1.0, 0.8, 1.0, 1.0);
+		gl_FragColor = black + vec4(rgb[0], rgb[1], rgb[2], 1.0) * (white - black);
 	}
 	</script>
 	<script>

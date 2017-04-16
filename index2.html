@@ -125,10 +125,6 @@
 		return sin(value * TWO_PI) * 0.5 + 0.5;
 	}
 
-	float lum(vec4 c) {
-		return 0.299 * c.r + 0.587 * c.g + 0.114 * c.b;
-	}
-
 	void main(void) {
 		vec2 tx = gl_FragCoord.xy / resolution.xy - 0.5;
 		tx.x *= resolution.x / resolution.y;
@@ -144,17 +140,7 @@
 			) + 0.5
 		);
 
-		vec4 mapColor = mix(
-			vec4(1.0, 0.0, 0.5, 1.0),
-			vec4(1.0, 0.8, 1.0, 1.0),
-			lum(imgColor)
-		);
-
-		gl_FragColor = mix(
-			imgColor,
-			mapColor,
-			clamp(abs(velocity * 5.0), 0.0, 1.0)
-		);
+		gl_FragColor = vec4(cos((imgColor.rgb + velocity) * TWO_PI * 2.0), 1.0);
 	}
 	</script>
 	<script>
@@ -186,7 +172,7 @@
 			regl.frame(function(ctx) {
 				var aspect = canvas.scrollWidth / canvas.scrollHeight;
 				var scroll = window.pageYOffset / (document.documentElement.scrollHeight - window.innerHeight);
-				velocity = velocity * 0.98 + (scroll - lastScroll);
+				velocity = velocity * 0.95 + (scroll - lastScroll);
 				lastScroll = scroll;
 
 				canvas.width = 1024 * aspect;

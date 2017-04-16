@@ -3,7 +3,7 @@
 <head>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>WebGL Scroll-Spiral Effect | Demo 1 | Codrops</title>
+	<title>Scroll Spiral | Demo 1 | Codrops</title>
 	<meta name="description" content="" />
 	<meta name="keywords" content="" />
 	<meta name="author" content="Codrops" />
@@ -14,7 +14,7 @@
 	<link rel="stylesheet" type="text/css" href="css/component.css" />
 	<style>
 	body { color: #ddd; background: #000; }
-	a { color: #eee; }
+	a { color: #d00; }
 	a:hover, a:focus { color: #fff; }
 	</style>
 	<script>document.documentElement.className = 'js';</script>
@@ -41,7 +41,7 @@
 						<a class="codrops-icon codrops-icon--prev" href="" title="Previous Demo"><svg class="icon icon--arrow"><use xlink:href="#icon-arrow"></use></svg></a>
 						<a class="codrops-icon codrops-icon--drop" href="" title="Back to the article"><svg class="icon icon--drop"><use xlink:href="#icon-drop"></use></svg></a>
 					</div>
-					<h1 class="codrops-header__title">WebGL Scroll-Spiral Effect</h1>
+					<h1 class="codrops-header__title">Scroll Spiral</h1>
 					<p class="codrops-header__tagline">The Tagline</p>
 					<nav class="demos">
 						<a class="demo demo--current" href="index.html">Demo 1</a>
@@ -51,8 +51,16 @@
 				</header>
 			</div>
 			<div class="fullheight-foot">
+				<div class="content centered">
+					<p>Scroll Down</p>
+				</div>
+			</div>
+		</div>
+
+		<div class="fullheight">
+			<div class="fullheight-body">
 				<section class="content centered">
-					<h1>Scroll down</h1>
+					<h2>page 2</h2>
 				</section>
 			</div>
 		</div>
@@ -60,7 +68,7 @@
 		<div class="fullheight">
 			<div class="fullheight-body">
 				<section class="content centered">
-					<h1>page 2</h1>
+					<h2>page 3</h2>
 				</section>
 			</div>
 		</div>
@@ -68,7 +76,7 @@
 		<div class="fullheight">
 			<div class="fullheight-body">
 				<section class="content centered">
-					<h1>page 3</h1>
+					<h2>page 4</h2>
 				</section>
 			</div>
 		</div>
@@ -93,13 +101,6 @@
 	</main>
 
 	<script src="js/regl.min.js"></script>
-	<script type="x-shader/x-vertex" id="vertexShader">
-	precision mediump float;
-	attribute vec2 position;
-	void main() {
-		gl_Position = vec4(1.0 - 2.0 * position, 0.0, 1.0);
-	}
-	</script>
 	<script type="x-shader/x-fragment" id="fragmentShader">
 	#define TWO_PI 6.2831853072
 	#define PI 3.14159265359
@@ -109,13 +110,14 @@
 	uniform float globaltime;
 	uniform vec2 resolution;
 	uniform float scroll;
+	uniform float velocity;
 
 	const float timescale = 0.1;
-	const float displace = 0.02;
+	const float displace = 0.05;
 	const float gridSize = 20.0;
 	const int layers = 3;
 	const float detail = 2.0;
-	const float wave = 1.5;
+	const float wave = 1.0;
 
 	vec2 rotate(vec2 v, float angle) {
 		float c = cos(angle);
@@ -146,20 +148,16 @@
 		return mix(absMax(hex), 1.0 - length(hex) / sqrt(3.0), amt);
 	}
 
-	float calc(vec2 tx, float time) {
+	float calc(vec3 hex, float time, float len) {
 		float value = 0.0;
-		float len = 1.0 - length(tx);
-		float zoom = nsin(time * 0.1) * (1.0 + scroll);
-		float angle = TWO_PI * nsin(time * 0.05) + TWO_PI * len * scroll;
-		vec3 hex = coordToHex(tx, gridSize * zoom, angle);
 
 		for (int i = 0; i < layers; i++) {
 			vec3 cell = hexToCell(hex, 1.0 + float(i));
 			value += nsin(
 				hexToFloat(
 					cell,
-					nsin(time + len * wave)
-				) * detail + nsin(time * 0.2)
+					nsin(len * wave + time + float(i) / float(layers))
+				) * detail + nsin(time * 0.5)
 			);
 		}
 
@@ -167,65 +165,80 @@
 	}
 
 	void main(void) {
-		vec2 tx = gl_FragCoord.xy / resolution.xy - 0.5;
-		tx.x *= resolution.x / resolution.y;
+		vec2 tx = (gl_FragCoord.xy / resolution.xy - 0.5) * vec2(resolution.x / resolution.y, 1.0);
 		float time = globaltime * timescale - scroll;
-
+		float invScroll = 1.0 - scroll;
 		float rgb[3];
-		vec4 black = mix(
-			vec4(0.0, 0.0, 0.2, 1.0),
-			vec4(0.1, 0.0, 0.2, 1.0),
-			scroll
-		);
-		vec4 white = mix(
-			vec4(0.8, 0.7, 0.9, 1.0),
-			vec4(0.9, 0.6, 0.2, 1.0),
-			scroll
-		);
+		float len = 1.0 - length(tx);
+		float zoom = nsin(time * 0.1) + len * velocity * 3.0;
+		float angle = TWO_PI * nsin(time * 0.05) + TWO_PI * len * scroll;
+		vec3 hex = coordToHex(tx, gridSize * zoom, angle);
 
 		for (int i = 0; i < 3; i++) {
-			float time2 = time + float(i) * displace;
-			rgb[i] = pow(calc(tx, time2), 3.0);
+			float time2 = time + float(i) * displace * invScroll;
+			rgb[i] = pow(calc(hex, time2, len), 3.0) * len;
 		}
 
-		gl_FragColor = black + vec4(rgb[0], rgb[1], rgb[2], 1.0) * (white - black);
+		gl_FragColor = vec4(rgb[0] * 0.9, rgb[1] * 0.8 * invScroll, rgb[2] * invScroll, 1.0);
 	}
 	</script>
-	<script>
+	<script id="mainLogic">
 	!function() {
 		'use strict';
 
 		var canvas = document.querySelector('#webgl');
-		var regl = createREGL({ canvas: canvas });
+
+		// Scroll variables
+		var scroll = 0.0, velocity = 0.0, lastScroll = 0.0;
+
+		// initialize REGL from a canvas element
+		var regl = createREGL({
+			canvas: canvas,
+			onDone: function(err, regl) { if (err) { alert(err); } }
+		});
+
+		// Create a REGL draw command
 		var draw = regl({
 			frag: document.querySelector('#fragmentShader').textContent,
-			vert: document.querySelector('#vertexShader').textContent,
+			vert: 'attribute vec2 position; void main() { gl_Position = vec4(1.0 - 2.0 * position, 0.0, 1.0); }',
 			attributes: { position: [-2, 0, 0, -2, 2, 2] },
+			count: 3,
 			uniforms: {
 				globaltime: regl.prop('globaltime'),
 				resolution: regl.prop('resolution'),
-				scroll: regl.prop('scroll')
-			},
-			count: 3
+				scroll: regl.prop('scroll'),
+				velocity: regl.prop('velocity')
+			}
 		});
 
+		// Hook a callback to execute each frame
 		regl.frame(function(ctx) {
-			var aspect = canvas.scrollWidth / canvas.scrollHeight;
-			var scroll = window.pageYOffset / (document.documentElement.scrollHeight - window.innerHeight);
 
+			// Resize a canvas element with the aspect ratio (100vw, 100vh)
+			var aspect = canvas.scrollWidth / canvas.scrollHeight;
 			canvas.width = 512 * aspect;
 			canvas.height = 512;
+
+			// Scroll amount (0.0 to 1.0)
+			scroll = window.pageYOffset / (document.documentElement.scrollHeight - window.innerHeight);
+
+			// Scroll velocity
+			velocity = velocity * 0.99 + (scroll - lastScroll);
+			lastScroll = scroll;
+
+			// Clear the draw buffer
 			regl.clear({ color: [0, 0, 0, 0] });
 
+			// Execute a REGL draw command
 			draw({
 				globaltime: ctx.time,
 				resolution: [ctx.viewportWidth, ctx.viewportHeight],
-				scroll: scroll
+				scroll: scroll,
+				velocity: velocity
 			});
 		});
 
 	}();
 	</script>
-
 </body>
 </html>

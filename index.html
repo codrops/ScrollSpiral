@@ -113,7 +113,7 @@
 	uniform float velocity;
 
 	const float timescale = 0.1;
-	const float displace = 0.05;
+	const float displace = 0.03;
 	const float gridSize = 20.0;
 	const int layers = 3;
 	const float detail = 2.0;
@@ -179,10 +179,10 @@
 			rgb[i] = pow(calc(hex, time2, len), 3.0) * len;
 		}
 
-		gl_FragColor = vec4(rgb[0] * 0.9, rgb[1] * 0.8 * invScroll, rgb[2] * invScroll, 1.0);
+		gl_FragColor = vec4(rgb[0] * (1.0 - scroll * 0.2), rgb[1] * invScroll, (rgb[2]  + 0.2) * invScroll, 1.0);
 	}
 	</script>
-	<script id="mainLogic">
+	<script>
 	!function() {
 		'use strict';
 

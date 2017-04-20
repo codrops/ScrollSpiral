@@ -109,12 +109,13 @@
 
 	uniform float globaltime;
 	uniform vec2 resolution;
+	uniform float aspect;
 	uniform float scroll;
 	uniform float velocity;
 
-	const float timescale = 0.1;
+	const float timescale = 0.15;
 	const float displace = 0.03;
-	const float gridSize = 20.0;
+	const float gridSize = 10.0;
 	const int layers = 3;
 	const float detail = 2.0;
 	const float wave = 1.0;
@@ -165,21 +166,26 @@
 	}
 
 	void main(void) {
-		vec2 tx = (gl_FragCoord.xy / resolution.xy - 0.5) * vec2(resolution.x / resolution.y, 1.0);
+		vec2 tx = (gl_FragCoord.xy / resolution.xy - 0.5) * vec2(aspect, 1.0) * 2.0;
 		float time = globaltime * timescale - scroll;
 		float invScroll = 1.0 - scroll;
 		float rgb[3];
 		float len = 1.0 - length(tx);
-		float zoom = nsin(time * 0.1) + len * velocity * 3.0;
-		float angle = TWO_PI * nsin(time * 0.05) + TWO_PI * len * scroll;
+		float zoom = nsin(time * 0.1) + len * velocity * 6.0;
+		float angle = TWO_PI * nsin(time * 0.05) + PI * len * scroll;
 		vec3 hex = coordToHex(tx, gridSize * zoom, angle);
 
 		for (int i = 0; i < 3; i++) {
 			float time2 = time + float(i) * displace * invScroll;
-			rgb[i] = pow(calc(hex, time2, len), 3.0) * len;
+			rgb[i] = pow(calc(hex, time2, len), 3.0) * (0.2 + 0.8 * sin(PI * len * 0.5));
 		}
 
-		gl_FragColor = vec4(rgb[0] * (1.0 - scroll * 0.2), rgb[1] * invScroll, (rgb[2]  + 0.2) * invScroll, 1.0);
+		gl_FragColor = vec4(
+			rgb[0] * (1.0 - scroll * 0.2),
+			rgb[1] * invScroll,
+			(rgb[2] + 0.2) * invScroll,
+			1.0
+		);
 	}
 	</script>
 	<script>
@@ -206,6 +212,7 @@
 			uniforms: {
 				globaltime: regl.prop('globaltime'),
 				resolution: regl.prop('resolution'),
+				aspect: regl.prop('aspect'),
 				scroll: regl.prop('scroll'),
 				velocity: regl.prop('velocity')
 			}
@@ -233,6 +240,7 @@
 			draw({
 				globaltime: ctx.time,
 				resolution: [ctx.viewportWidth, ctx.viewportHeight],
+				aspect: aspect,
 				scroll: scroll,
 				velocity: velocity
 			});

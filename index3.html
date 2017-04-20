@@ -178,7 +178,7 @@
 		float time = globaltime * timescale;
 		vec2 center = vec2(sin(TWO_PI * time * 0.5), cos(TWO_PI * time * 0.5)) * nsin(time * 0.3) * 0.5;
 		vec2 tx = (gl_FragCoord.xy / resolution.xy - 0.5 + center) * vec2(aspect, 1.0) * 2.0;
-		float len = 1.0 - length(tx - center * 2.0) * 0.9;
+		float len = 1.0 - length(tx - center * 2.0);
 		float zoom = 2.0 + velocity * 3.0;
 		float angle = TWO_PI * velocity * len;
 		float value = 0.0;

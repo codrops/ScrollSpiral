@@ -200,14 +200,16 @@
 		// initialize REGL from a canvas element
 		var regl = createREGL({
 			canvas: canvas,
-			onDone: function(err, regl) { if (err) { alert(err); } }
+			onDone: function(error, regl) {
+				if (error) { alert(error); }
+			}
 		});
 
 		// Create a REGL draw command
 		var draw = regl({
 			frag: document.querySelector('#fragmentShader').textContent,
-			vert: 'attribute vec2 position; void main() { gl_Position = vec4(1.0 - 2.0 * position, 0.0, 1.0); }',
-			attributes: { position: [-2, 0, 0, -2, 2, 2] },
+			vert: 'attribute vec2 position; void main() { gl_Position = vec4(3.0 * position, 0.0, 1.0); }',
+			attributes: { position: [-1, 0, 0, -1, 1, 1] },
 			count: 3,
 			uniforms: {
 				globaltime: regl.prop('globaltime'),

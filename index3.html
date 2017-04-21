@@ -14,9 +14,9 @@
 	<link rel="stylesheet" type="text/css" href="css/component.css" />
 	<script>document.documentElement.className = 'js';</script>
 	<style>
-	body { color: #222; background: #fff; }
-	a { color: #555; }
-	a:hover, a:focus { color: #000; }
+	body { color: #ddd; background: #000; }
+	a { color: #bbb; }
+	a:hover, a:focus { color: #fff; }
 	</style>
 </head>
 <body>
@@ -178,9 +178,9 @@
 		float time = globaltime * timescale;
 		vec2 center = vec2(sin(TWO_PI * time * 0.5), cos(TWO_PI * time * 0.5)) * nsin(time * 0.3) * 0.5;
 		vec2 tx = (gl_FragCoord.xy / resolution.xy - 0.5 + center) * vec2(aspect, 1.0) * 2.0;
-		float len = 1.0 - length(tx - center * 2.0);
+		float len = 1.0 - length(tx - center * 2.0) * 0.8;
 		float zoom = 2.0 + velocity * 3.0;
-		float angle = TWO_PI * velocity * len;
+		float angle = PI * velocity * len;
 		float value = 0.0;
 
 		int age = 0;
@@ -189,7 +189,7 @@
 		float shift = float(age) / 3.0;
 
 		value = nsin(
-			hexToFloat(cell, nsin(time + shift)) * 4.0 * nsin(time * 0.5 + shift)
+			hexToFloat(cell, nsin(time + shift)) * 3.0 * nsin(time * 0.5 + shift)
 			+ shift
 			+ time
 		) * len;
@@ -209,7 +209,9 @@
 		// initialize REGL from a canvas element
 		var regl = createREGL({
 			canvas: canvas,
-			onDone: function(err, regl) { if (err) { alert(err); } }
+			onDone: function(error, regl) {
+				if (error) { alert(error); }
+			}
 		});
 
 		// Loading a texture
@@ -220,8 +222,8 @@
 			// Create a REGL draw command
 			var draw = regl({
 				frag: document.querySelector('#fragmentShader').textContent,
-				vert: 'attribute vec2 position; void main() { gl_Position = vec4(1.0 - 2.0 * position, 0.0, 1.0); }',
-				attributes: { position: [-2, 0, 0, -2, 2, 2] },
+				vert: 'attribute vec2 position; void main() { gl_Position = vec4(3.0 * position, 0.0, 1.0); }',
+				attributes: { position: [-1, 0, 0, -1, 1, 1] },
 				count: 3,
 				uniforms: {
 					globaltime: regl.prop('globaltime'),

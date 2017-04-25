@@ -3,95 +3,65 @@
 <head>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Scroll Spiral | Demo 2 | Codrops</title>
-	<meta name="description" content="" />
-	<meta name="keywords" content="" />
+	<title>WebGL Scroll Spiral | Demo 2 | Codrops</title>
+	<meta name="description" content="Some decorative background scroll effects for websites using WebGL and regl" />
+	<meta name="keywords" content="regl, webgl, background, website, decorative, scroll effect, spiral, distortion " />
 	<meta name="author" content="Codrops" />
 	<link rel="shortcut icon" href="favicon.ico">
 	<link href="https://fonts.googleapis.com/css?family=Roboto+Mono:400,700" rel="stylesheet">
 	<link rel="stylesheet" type="text/css" href="css/normalize.css" />
 	<link rel="stylesheet" type="text/css" href="css/demo.css" />
-	<link rel="stylesheet" type="text/css" href="css/component.css" />
 	<script>document.documentElement.className = 'js';</script>
-	<style>
-	body { color: #222; background: #fff; }
-	a { color: #222; }
-	a:hover, a:focus { color: #222; }
-	</style>
 </head>
-<body>
+<body class="demo-2 loading">
 	<canvas id="webgl"></canvas>
-
 	<svg class="hidden">
 		<symbol id="icon-arrow" viewBox="0 0 24 24">
 			<title>arrow</title>
-			<polygon points="6.3,12.8 20.9,12.8 20.9,11.2 6.3,11.2 10.2,7.2 9,6 3.1,12 9,18 10.2,16.8 "/>
+			<polygon points="6.3,12.8 20.9,12.8 20.9,11.2 6.3,11.2 10.2,7.2 9,6 3.1,12 9,18 10.2,16.8 " />
 		</symbol>
 		<symbol id="icon-drop" viewBox="0 0 24 24">
 			<title>drop</title>
-			<path d="M12,21c-3.6,0-6.6-3-6.6-6.6C5.4,11,10.8,4,11.4,3.2C11.6,3.1,11.8,3,12,3s0.4,0.1,0.6,0.3c0.6,0.8,6.1,7.8,6.1,11.2C18.6,18.1,15.6,21,12,21zM12,4.8c-1.8,2.4-5.2,7.4-5.2,9.6c0,2.9,2.3,5.2,5.2,5.2s5.2-2.3,5.2-5.2C17.2,12.2,13.8,7.3,12,4.8z"/><path d="M12,18.2c-0.4,0-0.7-0.3-0.7-0.7s0.3-0.7,0.7-0.7c1.3,0,2.4-1.1,2.4-2.4c0-0.4,0.3-0.7,0.7-0.7c0.4,0,0.7,0.3,0.7,0.7C15.8,16.5,14.1,18.2,12,18.2z"/>
+			<path d="M12,21c-3.6,0-6.6-3-6.6-6.6C5.4,11,10.8,4,11.4,3.2C11.6,3.1,11.8,3,12,3s0.4,0.1,0.6,0.3c0.6,0.8,6.1,7.8,6.1,11.2C18.6,18.1,15.6,21,12,21zM12,4.8c-1.8,2.4-5.2,7.4-5.2,9.6c0,2.9,2.3,5.2,5.2,5.2s5.2-2.3,5.2-5.2C17.2,12.2,13.8,7.3,12,4.8z" />
+			<path d="M12,18.2c-0.4,0-0.7-0.3-0.7-0.7s0.3-0.7,0.7-0.7c1.3,0,2.4-1.1,2.4-2.4c0-0.4,0.3-0.7,0.7-0.7c0.4,0,0.7,0.3,0.7,0.7C15.8,16.5,14.1,18.2,12,18.2z" />
 		</symbol>
 	</svg>
-
 	<main>
-		<div class="fullheight">
-			<div class="fullheight-head">
-				<header class="codrops-header">
-					<div class="codrops-links">
-						<a class="codrops-icon codrops-icon--prev" href="" title="Previous Demo"><svg class="icon icon--arrow"><use xlink:href="#icon-arrow"></use></svg></a>
-						<a class="codrops-icon codrops-icon--drop" href="" title="Back to the article"><svg class="icon icon--drop"><use xlink:href="#icon-drop"></use></svg></a>
-					</div>
-					<h1 class="codrops-header__title">Scroll Spiral</h1>
-					<p class="codrops-header__tagline">The Tagline</p>
-					<nav class="demos">
-						<a class="demo" href="index.html">Demo 1</a>
-						<a class="demo demo--current" href="index2.html">Demo 2</a>
-						<a class="demo" href="index3.html">Demo 3</a>
-					</nav>
-				</header>
-			</div>
-			<div class="fullheight-foot">
-				<div class="content centered">
-					<p>Scroll Down</p>
+		<header class="content content--header">
+			<div class="content__top">
+				<h1 class="main-title">Scroll Spirals</h1>
+				<p class="main-tagline">Decorative Background Effects with WebGL</p>
+				<a class="github" href="https://github.com/codrops/ScrollSpiral/">GitHub</a>
+				<div class="codrops-links">
+					<a class="codrops-icon codrops-icon--prev" href="https://tympanus.net/Development/DeveloperDesignerPageLayout/" title="Previous Demo"><svg class="icon icon--arrow"><use xlink:href="#icon-arrow"></use></svg></a>
+					<a class="codrops-icon codrops-icon--drop" href="https://tympanus.net/codrops/?p=30761" title="Back to the article"><svg class="icon icon--drop"><use xlink:href="#icon-drop"></use></svg></a>
 				</div>
+				<nav class="demos">
+					<a class="demo" href="index.html">Demo 1</a>
+					<a class="demo demo--current" href="index2.html">Demo 2</a>
+					<a class="demo" href="index3.html">Demo 3</a>
+					<a class="demo" href="index4.html">Demo 4</a>
+					<a class="demo" href="index5.html">Demo 5</a>
+					<a class="demo" href="index6.html">Demo 6</a>
+					<a class="demo" href="index7.html">Demo 7</a>
+					<a class="demo" href="index8.html">Demo 8</a>
+				</nav>
 			</div>
-		</div>
-
-		<div class="fullheight">
-			<div class="fullheight-body">
-				<section class="content centered">
-					<h2>page 2</h2>
-				</section>
-			</div>
-		</div>
-
-		<div class="fullheight">
-			<div class="fullheight-body">
-				<section class="content centered">
-					<h2>page 3</h2>
-				</section>
-			</div>
-		</div>
-
-		<div class="fullheight">
-			<div class="fullheight-body">
-				<!-- Related demos -->
-				<section class="content content--related">
-					<p>If you enjoyed this demo you might also like:</p>
-					<a class="media-item" href="">
-						<img class="media-item__img" src="">
-						<h3 class="media-item__title">Title</h3>
-					</a>
-					<a class="media-item" href="">
-						<img class="media-item__img" src="">
-						<h3 class="media-item__title">Title</h3>
-					</a>
-				</section>
-			</div>
-		</div>
-
+		</header>
+		<section class="content content--main"></section>
+		<section class="content content--related">
+			<p class="content__text">This demo is powered by <a href="http://regl.party/">regl &mdash; declarative and stateless webgl</a></p>
+			<h3 class="content__text">If you enjoyed this demo you might also like:</h3>
+			<a class="media-item" href="https://tympanus.net/Development/AnimatedHeaderBackgrounds/">
+				<img class="media-item__img" src="img/related/AnimatedHeaderBackgrounds.png">
+				<h3 class="media-item__title">Animated Background Headers</h3>
+			</a>
+			<a class="media-item" href="https://tympanus.net/Tutorials/PrismEffectSlider/">
+				<img class="media-item__img" src="img/related/PrismEffectSlider.jpg">
+				<h3 class="media-item__title">Prism Effect Slider</h3>
+			</a>
+		</section>
 	</main>
-
 	<script src="js/regl.min.js"></script>
 	<script type="x-shader/x-fragment" id="fragmentShader">
 	#define TWO_PI 6.2831853072
@@ -124,7 +94,7 @@
 		vec2 center = vec2(sin(TWO_PI * time * 0.2), cos(TWO_PI * time * 0.2)) * nsin(time * 0.3) * 0.5;
 		vec2 tx = (gl_FragCoord.xy / resolution.xy - 0.5 - center) * vec2(aspect, 1.0);
 		float len = 1.0 - length(tx);
-		float zoom = 1.0 + scroll - len * 3.0 * (1.0 - scroll) + len * velocity * 10.0;
+		float zoom = 1.0 + scroll - len * 3.0 * (1.0 - scroll) + len * velocity * 2.0;
 
 		vec4 imgColor = texture2D(
 			texture,
@@ -137,75 +107,6 @@
 		gl_FragColor = imgColor;
 	}
 	</script>
-	<script>
-	!function() {
-		'use strict';
-
-		var canvas = document.querySelector('#webgl');
-
-		// Scroll variables
-		var scroll = 0.0, velocity = 0.0, lastScroll = 0.0;
-
-		// Initialize REGL from a canvas element
-		var regl = createREGL({
-			canvas: canvas,
-			onDone: function(error, regl) {
-				if (error) { alert(error); }
-			}
-		});
-
-		// Loading a texture
-		var img = new Image();
-		img.src = 'img/test.jpg';
-		img.onload = function() {
-
-			// Create a REGL draw command
-			var draw = regl({
-				frag: document.querySelector('#fragmentShader').textContent,
-				vert: 'attribute vec2 position; void main() { gl_Position = vec4(3.0 * position, 0.0, 1.0); }',
-				attributes: { position: [-1, 0, 0, -1, 1, 1] },
-				count: 3,
-				uniforms: {
-					globaltime: regl.prop('globaltime'),
-					resolution: regl.prop('resolution'),
-					aspect: regl.prop('aspect'),
-					scroll: regl.prop('scroll'),
-					velocity: regl.prop('velocity'),
-					texture: regl.texture(img)
-				}
-			});
-
-			// Hook a callback to execute each frame
-			regl.frame(function(ctx) {
-
-				// Resize a canvas element with the aspect ratio (100vw, 100vh)
-				var aspect = canvas.scrollWidth / canvas.scrollHeight;
-				canvas.width = 1024 * aspect;
-				canvas.height = 1024;
-
-				// Scroll amount (0.0 to 1.0)
-				scroll = window.pageYOffset / (document.documentElement.scrollHeight - window.innerHeight);
-
-				// Scroll velocity
-				velocity = velocity * 0.98 + (scroll - lastScroll);
-				lastScroll = scroll;
-
-				// Clear the draw buffer
-				regl.clear({ color: [0, 0, 0, 0] });
-
-				// Execute a REGL draw command
-				draw({
-					globaltime: ctx.time,
-					resolution: [ctx.viewportWidth, ctx.viewportHeight],
-					aspect: aspect,
-					scroll: scroll,
-					velocity: velocity
-				});
-			});
-		};
-
-	}();
-	</script>
-
+	<script src="js/demo2.js"></script>
 </body>
 </html>

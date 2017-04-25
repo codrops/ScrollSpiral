@@ -13,7 +13,7 @@
 	<link rel="stylesheet" type="text/css" href="css/demo.css" />
 	<script>document.documentElement.className = 'js';</script>
 </head>
-<body class="demo-3 loading">
+<body class="demo-4 loading">
 	<canvas id="webgl"></canvas>
 	<svg class="hidden">
 		<symbol id="icon-arrow" viewBox="0 0 24 24">
@@ -39,8 +39,8 @@
 				<nav class="demos">
 					<a class="demo" href="index.html">Demo 1</a>
 					<a class="demo" href="index2.html">Demo 2</a>
-					<a class="demo demo--current" href="index3.html">Demo 3</a>
-					<a class="demo" href="index4.html">Demo 4</a>
+					<a class="demo" href="index3.html">Demo 3</a>
+					<a class="demo demo--current" href="index4.html">Demo 4</a>
 					<a class="demo" href="index5.html">Demo 5</a>
 					<a class="demo" href="index6.html">Demo 6</a>
 					<a class="demo" href="index7.html">Demo 7</a>
@@ -93,8 +93,8 @@
 		float time = globaltime * timescale;
 		vec2 center = vec2(sin(TWO_PI * time * 0.2), cos(TWO_PI * time * 0.2)) * nsin(time * 0.3) * 0.5;
 		vec2 tx = (gl_FragCoord.xy / resolution.xy - 0.5 - center) * vec2(aspect, 1.0);
-		float len = 1.0 - length(tx);
-		float zoom = 0.0 + scroll - len * 2.0 * (1.0 - scroll) + len * velocity;
+		float len = length(tx);
+		float zoom = 1.0 + scroll - len * 10.0 * (1.0 - scroll) + len * velocity * 10.0;
 
 		vec4 imgColor = texture2D(
 			texture,
@@ -107,6 +107,6 @@
 		gl_FragColor = imgColor;
 	}
 	</script>
-	<script src="js/demo3.js"></script>
+	<script src="js/demo4.js"></script>
 </body>
 </html>

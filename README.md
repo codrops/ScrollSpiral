@@ -2,6 +2,8 @@
 
 Some decorative background scroll effects for websites using WebGL and regl. By Xoihazard.
 
+![WebGL Scroll Spiral](https://tympanus.net/codrops/wp-content/uploads/2017/04/WebGLScrollSpiral_800x600.jpg)
+
 [Article on Codrops](https://tympanus.net/codrops/?p=30761)
 
 [Demo](https://tympanus.net/Development/ScrollSpiral/)

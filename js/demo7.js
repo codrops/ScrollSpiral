@@ -16,7 +16,7 @@
 
 	// Loading a texture
 	var img = new Image();
-	img.src = 'img/gradient_map4.png';
+	img.src = 'img/gradient_map2.png';
 	img.onload = function() {
 		setTimeout(function() { document.body.classList.remove('loading');}, 1000);
 

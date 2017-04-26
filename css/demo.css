@@ -76,7 +76,7 @@ main::before {
 	margin: -25px 0 0 -25px;
 	pointer-events: none;
 	border-radius: 50%;
-	background: #fff;
+	background: #3b3b3b;
 	animation: loaderAnim 0.8s ease-out infinite alternate forwards;
 }
 
@@ -234,6 +234,10 @@ main::before {
 	margin: 0 0 1em 0;
 }
 
+.content__text:first-child {
+	margin: 0 0 5em 0;
+}
+
 .media-item {
 	display: inline-block;
 	padding: 1em;
@@ -329,24 +333,24 @@ main::before {
 
 /* Demo 7 */
 .demo-7 {
-	background: #f2cf2b;
+	background: #000;
 }
 .demo-7 main::before {
-	background: rgba(0, 0, 0, 0.3);
+	background: rgba(0, 0, 0, 0.6);
 }
 .demo-7 .content--related {
-	background: #f2cf2b;
+	background: #000;
 }
 
 /* Demo 8 */
 .demo-8 {
-	background: #a44a31;
+	background: #232121;
 }
 .demo-8 main::before {
-	background: rgba(226, 104, 40, 0.3);
+	background: rgba(84, 115, 243, 0.3);
 }
 .demo-8 .content--related {
-	background: #a44a31;
+	background: #232121;
 }
 
 /* Demo 9 */
@@ -354,21 +358,10 @@ main::before {
 	background: #232121;
 }
 .demo-9 main::before {
-	background: rgba(0, 0, 0, 0.5);
-}
-.demo-9 .content--related {
-	background: #232121;
-}
-
-/* Demo 10 */
-.demo-10 {
-	background: #210d54;
-}
-.demo-10 main::before {
 	background: rgba(0, 0, 0, 0.3);
 }
-.demo-10 .content--related {
-	background: #210d54;
+.demo-9 .content--related {
+	background: #2a2acf;
 }
 
 @media screen and (max-width: 40em) {

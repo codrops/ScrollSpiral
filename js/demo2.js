@@ -46,12 +46,11 @@
 
 			// Scroll amount (0.0 to 1.0)
 			scroll = window.pageYOffset / (document.documentElement.scrollHeight - window.innerHeight);
-			
+
 			// Scroll Velocity
 			// Inertia example:
 			// velocity = velocity * 0.99 + (scroll - lastScroll);
-			velocity = 0;
-			lastScroll = scroll;
+			// lastScroll = scroll;
 
 			// Clear the draw buffer
 			regl.clear({ color: [0, 0, 0, 0] });
